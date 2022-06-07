@@ -46,6 +46,27 @@ services:
       - 4224:4222
     volumes:
       - ./jetstream-cluster/n3:/data
-
+      
+  # Monitoring
+  project-prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - 19090:9090
+  
+  project-grafana:
+    image: grafana/grafana:8.3.6
+    volumes:
+      - ./datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
+      - ./dashboard-provider.yml:/etc/grafana/provisioning/dashboards/dashboard-provider.yml
+      - ./dashboard-prometheus.json:/var/lib/grafana/dashboards/demo/dashboard-prometheus.json
+    depends_on:
+      - project-prometheus
+    ports:
+      - 13000:3000
+      
 networks:
   mongodb_nats: {}
